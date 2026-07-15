@@ -1,0 +1,33 @@
+{
+  "name": "connector-data-minimizer-skill",
+  "version": "0.1.0",
+  "description": "Audit connector action fixtures for minimal data collection before agent approval.",
+  "type": "module",
+  "bin": {
+    "connector-data-minimizer": "./src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/*.js test/*.test.js",
+    "smoke": "node src/cli.js fixtures/action.json --policy fixtures/policy.json --format markdown"
+  },
+  "keywords": [
+    "agent-skills",
+    "connector",
+    "privacy",
+    "dry-run",
+    "approval"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "src",
+    "docs",
+    "fixtures",
+    "SKILL.md",
+    "README.md"
+  ]
+}
+
