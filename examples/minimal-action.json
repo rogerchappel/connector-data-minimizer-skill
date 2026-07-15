@@ -1,0 +1,9 @@
+{
+  "connector": "ticketing",
+  "operation": "assign-ticket",
+  "destination": "sandbox",
+  "approval": "dry-run",
+  "requiredFields": ["ticket_id", "assignee"],
+  "requestedFields": ["ticket_id", "assignee"]
+}
+
