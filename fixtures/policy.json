@@ -1,0 +1,7 @@
+{
+  "allowedFields": ["email", "name", "company", "title"],
+  "sensitiveFields": ["ssn", "private_note"],
+  "blockedFields": ["ssn"],
+  "manualReviewApprovals": ["live-write", "production"]
+}
+
