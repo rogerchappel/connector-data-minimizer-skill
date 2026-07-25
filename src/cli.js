@@ -13,12 +13,23 @@ async function main(argv) {
   const action = JSON.parse(await readFile(fixturePath, 'utf8'));
   const policy = flags.policy ? JSON.parse(await readFile(flags.policy, 'utf8')) : {};
   const report = analyzeAction(action, policy);
-  const format = flags.format ?? 'markdown';
+  const format = validateFormat(flags.format);
 
   process.stdout.write(format === 'json' ? formatJson(report) : formatMarkdown(report));
   if (flags.strict === true && report.unsafe) {
     process.exitCode = 2;
   }
+}
+
+function validateFormat(format) {
+  if (format === true) {
+    throw new Error('--format requires a value');
+  }
+  const selected = format ?? 'markdown';
+  if (!['markdown', 'json'].includes(selected)) {
+    throw new Error('--format must be one of: markdown, json');
+  }
+  return selected;
 }
 
 function parseFlags(args) {
@@ -44,4 +55,3 @@ main(process.argv.slice(2)).catch((error) => {
   process.stderr.write(`${error.message}\n`);
   process.exitCode = 1;
 });
-

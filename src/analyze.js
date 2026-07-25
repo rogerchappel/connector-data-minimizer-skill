@@ -7,6 +7,7 @@ const DEFAULT_POLICY = {
 
 export function analyzeAction(action, policy = {}) {
   validateAction(action);
+  validatePolicy(policy);
   const normalizedPolicy = { ...DEFAULT_POLICY, ...policy };
   const required = unique(action.requiredFields);
   const optional = unique(action.optionalFields ?? []);
@@ -66,6 +67,20 @@ export function validateAction(action) {
       throw new Error(`${key} must be an array`);
     }
   }
+  if (action.optionalFields !== undefined && !Array.isArray(action.optionalFields)) {
+    throw new Error('optionalFields must be an array');
+  }
+}
+
+export function validatePolicy(policy) {
+  if (!policy || typeof policy !== 'object' || Array.isArray(policy)) {
+    throw new Error('policy fixture must be an object');
+  }
+  for (const key of Object.keys(DEFAULT_POLICY)) {
+    if (policy[key] !== undefined && !Array.isArray(policy[key])) {
+      throw new Error(`policy.${key} must be an array`);
+    }
+  }
 }
 
 function chooseRecommendation(findings) {
@@ -81,4 +96,3 @@ function chooseRecommendation(findings) {
 function unique(values) {
   return [...new Set((values ?? []).map((value) => String(value).trim()).filter(Boolean))];
 }
-
