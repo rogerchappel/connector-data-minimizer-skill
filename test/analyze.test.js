@@ -48,3 +48,29 @@ test('blocks missing required fields', () => {
   assert.deepEqual(report.missingRequired, ['assignee']);
 });
 
+test('rejects a malformed optional field list', () => {
+  assert.throws(
+    () => analyzeAction({
+      connector: 'crm',
+      operation: 'update-contact',
+      requiredFields: ['email'],
+      optionalFields: 'company',
+      requestedFields: ['email']
+    }),
+    { message: 'optionalFields must be an array' }
+  );
+});
+
+for (const property of ['allowedFields', 'sensitiveFields', 'blockedFields', 'manualReviewApprovals']) {
+  test(`rejects a malformed policy ${property} list`, () => {
+    assert.throws(
+      () => analyzeAction({
+        connector: 'crm',
+        operation: 'update-contact',
+        requiredFields: ['email'],
+        requestedFields: ['email']
+      }, { [property]: 'email' }),
+      { message: `policy.${property} must be an array` }
+    );
+  });
+}

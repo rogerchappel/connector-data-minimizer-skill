@@ -22,6 +22,9 @@ node src/cli.js fixtures/action.json --policy fixtures/policy.json --format json
 connector-data-minimizer <action.json> [--policy policy.json] [--format markdown|json] [--strict]
 ```
 
+`--format` defaults to `markdown` and accepts only `markdown` or `json`. Supplying
+the flag without a value, or using another format name, exits with an error.
+
 Use `--strict` in CI or release gates when extra fields, missing required fields,
 blocked policy fields, or high-risk approval modes should fail the command.
 
@@ -43,7 +46,9 @@ field lists:
 ```
 
 Policy fixtures can define allowed fields, sensitive fields, blocked fields, and
-approval modes that require manual review.
+approval modes that require manual review. `requiredFields`, `optionalFields`,
+`requestedFields`, and every policy field list must be JSON arrays, including
+when a list contains only one field.
 
 ## Limitations
 
@@ -57,4 +62,3 @@ approval modes that require manual review.
 - Review the generated minimal field set before executing any real action.
 - Treat sensitive-field findings as approval blockers unless a human explicitly
   accepts the risk.
-
