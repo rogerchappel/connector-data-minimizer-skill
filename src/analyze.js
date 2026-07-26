@@ -8,10 +8,12 @@ const DEFAULT_POLICY = {
 export function analyzeAction(action, policy = {}) {
   validateAction(action);
   validatePolicy(policy);
-  const normalizedPolicy = { ...DEFAULT_POLICY, ...policy };
-  const required = unique(action.requiredFields);
-  const optional = unique(action.optionalFields ?? []);
-  const requested = unique(action.requestedFields);
+  const normalizedPolicy = Object.fromEntries(
+    Object.keys(DEFAULT_POLICY).map((key) => [key, normalizeList(policy[key] ?? [], `policy.${key}`)])
+  );
+  const required = normalizeList(action.requiredFields, 'requiredFields');
+  const optional = normalizeList(action.optionalFields ?? [], 'optionalFields');
+  const requested = normalizeList(action.requestedFields, 'requestedFields');
   const needed = new Set([...required, ...optional]);
   const allowed = new Set(normalizedPolicy.allowedFields ?? []);
   const sensitive = new Set(normalizedPolicy.sensitiveFields ?? []);
@@ -23,7 +25,9 @@ export function analyzeAction(action, policy = {}) {
   const disallowedFields = allowed.size === 0 ? [] : requested.filter((field) => !allowed.has(field));
   const sensitiveFields = requested.filter((field) => sensitive.has(field));
   const blockedFields = requested.filter((field) => blocked.has(field));
-  const manualReview = manualReviewApprovals.has(action.approval) || manualReviewApprovals.has(action.destination);
+  const manualReview = [action.approval, action.destination]
+    .filter((value) => typeof value === 'string')
+    .some((value) => manualReviewApprovals.has(value.trim()));
 
   const recommendation = chooseRecommendation({
     missingRequired,
@@ -93,6 +97,11 @@ function chooseRecommendation(findings) {
   return 'pass';
 }
 
-function unique(values) {
-  return [...new Set((values ?? []).map((value) => String(value).trim()).filter(Boolean))];
+function normalizeList(values, label) {
+  return [...new Set(values.map((value, index) => {
+    if (typeof value !== 'string' || value.trim() === '') {
+      throw new Error(`${label}[${index}] must be a non-empty string`);
+    }
+    return value.trim();
+  }))];
 }

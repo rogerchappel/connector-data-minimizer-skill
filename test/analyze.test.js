@@ -48,6 +48,32 @@ test('blocks missing required fields', () => {
   assert.deepEqual(report.missingRequired, ['assignee']);
 });
 
+test('normalizes and deduplicates action and policy field names', () => {
+  const report = analyzeAction(
+    {
+      connector: 'crm',
+      operation: 'create-contact',
+      destination: ' production ',
+      requiredFields: [' email ', 'email'],
+      optionalFields: [' ssn '],
+      requestedFields: ['email', ' ssn ', 'ssn']
+    },
+    {
+      allowedFields: [' email ', 'ssn', 'ssn '],
+      sensitiveFields: [' ssn '],
+      blockedFields: [' ssn ', 'ssn'],
+      manualReviewApprovals: [' production ']
+    }
+  );
+
+  assert.deepEqual(report.minimalFields, ['email']);
+  assert.deepEqual(report.requestedFields, ['email', 'ssn']);
+  assert.deepEqual(report.sensitiveFields, ['ssn']);
+  assert.deepEqual(report.blockedFields, ['ssn']);
+  assert.equal(report.manualReview, true);
+  assert.equal(report.recommendation, 'block');
+});
+
 test('rejects a malformed optional field list', () => {
   assert.throws(
     () => analyzeAction({
@@ -74,3 +100,34 @@ for (const property of ['allowedFields', 'sensitiveFields', 'blockedFields', 'ma
     );
   });
 }
+
+for (const [property, value] of [
+  ['requiredFields', 42],
+  ['optionalFields', '   '],
+  ['requestedFields', null]
+]) {
+  test(`rejects malformed action ${property} entries`, () => {
+    assert.throws(
+      () => analyzeAction({
+        connector: 'crm',
+        operation: 'update-contact',
+        requiredFields: property === 'requiredFields' ? [value] : ['email'],
+        optionalFields: property === 'optionalFields' ? [value] : [],
+        requestedFields: property === 'requestedFields' ? [value] : ['email']
+      }),
+      { message: `${property}[0] must be a non-empty string` }
+    );
+  });
+}
+
+test('rejects malformed policy list entries with their location', () => {
+  assert.throws(
+    () => analyzeAction({
+      connector: 'crm',
+      operation: 'update-contact',
+      requiredFields: ['email'],
+      requestedFields: ['email']
+    }, { blockedFields: ['ssn', false] }),
+    { message: 'policy.blockedFields[1] must be a non-empty string' }
+  );
+});
