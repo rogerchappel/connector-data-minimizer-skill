@@ -24,6 +24,7 @@ connector-data-minimizer <action.json> [--policy policy.json] [--format markdown
 
 `--format` defaults to `markdown` and accepts only `markdown` or `json`. Supplying
 the flag without a value, or using another format name, exits with an error.
+Unknown options and unexpected positional arguments are also rejected.
 
 Use `--strict` in CI or release gates when extra fields, missing required fields,
 blocked policy fields, or high-risk approval modes should fail the command.
@@ -48,7 +49,9 @@ field lists:
 Policy fixtures can define allowed fields, sensitive fields, blocked fields, and
 approval modes that require manual review. `requiredFields`, `optionalFields`,
 `requestedFields`, and every policy field list must be JSON arrays, including
-when a list contains only one field.
+when a list contains only one field. Every list entry must be a non-empty string.
+Surrounding whitespace is ignored and duplicate names are collapsed before
+action fields are compared with policy fields.
 
 ## Limitations
 
