@@ -34,19 +34,27 @@ function validateFormat(format) {
 
 function parseFlags(args) {
   const flags = {};
+  const valueFlags = new Set(['policy', 'format']);
+  const booleanFlags = new Set(['strict']);
   for (let index = 0; index < args.length; index += 1) {
     const arg = args[index];
     if (!arg.startsWith('--')) {
-      continue;
+      throw new Error(`unexpected argument: ${arg}`);
     }
     const key = arg.slice(2);
+    if (!valueFlags.has(key) && !booleanFlags.has(key)) {
+      throw new Error(`unknown option: --${key}`);
+    }
+    if (booleanFlags.has(key)) {
+      flags[key] = true;
+      continue;
+    }
     const next = args[index + 1];
     if (!next || next.startsWith('--')) {
-      flags[key] = true;
-    } else {
-      flags[key] = next;
-      index += 1;
+      throw new Error(`--${key} requires a value`);
     }
+    flags[key] = next;
+    index += 1;
   }
   return flags;
 }

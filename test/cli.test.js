@@ -25,6 +25,30 @@ test('rejects a missing output format value', () => {
   assert.match(result.stderr, /--format requires a value/);
 });
 
+test('rejects unknown options', () => {
+  const result = runCli('--bogus');
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'unknown option: --bogus\n');
+});
+
+test('rejects unexpected positional arguments', () => {
+  const result = runCli('extra.json');
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'unexpected argument: extra.json\n');
+});
+
+test('preserves policy and strict behavior', () => {
+  const result = runCli('--policy', 'fixtures/policy.json', '--format', 'json', '--strict');
+
+  assert.equal(result.status, 2);
+  assert.equal(JSON.parse(result.stdout).unsafe, true);
+  assert.equal(result.stderr, '');
+});
+
 test('preserves documented output formats', () => {
   const markdown = runCli('--format', 'markdown');
   const json = runCli('--format', 'json');
