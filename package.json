@@ -12,7 +12,8 @@
   "scripts": {
     "test": "node --test",
     "check": "node --check src/*.js test/*.test.js",
-    "smoke": "node src/cli.js fixtures/action.json --policy fixtures/policy.json --format markdown"
+    "smoke": "node src/cli.js fixtures/action.json --policy fixtures/policy.json --format markdown",
+    "package-smoke": "node scripts/package-smoke.mjs"
   },
   "keywords": [
     "agent-skills",
