@@ -58,7 +58,7 @@ export function analyzeAction(action, policy = {}) {
 }
 
 export function validateAction(action) {
-  if (!action || typeof action !== 'object') {
+  if (!action || typeof action !== 'object' || Array.isArray(action)) {
     throw new Error('action fixture must be an object');
   }
   for (const key of ['connector', 'operation', 'requiredFields', 'requestedFields']) {
@@ -71,6 +71,14 @@ export function validateAction(action) {
       throw new Error(`${key} must be an array`);
     }
   }
+  for (const key of ['connector', 'operation']) {
+    validateNonEmptyString(action[key], key);
+  }
+  for (const key of ['destination', 'approval']) {
+    if (action[key] !== undefined) {
+      validateNonEmptyString(action[key], key);
+    }
+  }
   if (action.optionalFields !== undefined && !Array.isArray(action.optionalFields)) {
     throw new Error('optionalFields must be an array');
   }
@@ -80,10 +88,21 @@ export function validatePolicy(policy) {
   if (!policy || typeof policy !== 'object' || Array.isArray(policy)) {
     throw new Error('policy fixture must be an object');
   }
+  for (const key of Object.keys(policy)) {
+    if (!(key in DEFAULT_POLICY)) {
+      throw new Error(`unknown policy property: ${key}`);
+    }
+  }
   for (const key of Object.keys(DEFAULT_POLICY)) {
     if (policy[key] !== undefined && !Array.isArray(policy[key])) {
       throw new Error(`policy.${key} must be an array`);
     }
+  }
+}
+
+function validateNonEmptyString(value, label) {
+  if (typeof value !== 'string' || value.trim() === '') {
+    throw new Error(`${label} must be a non-empty string`);
   }
 }
 
