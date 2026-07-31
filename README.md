@@ -46,12 +46,18 @@ field lists:
 }
 ```
 
+`connector` and `operation` are required non-empty strings. When supplied,
+`destination` and `approval` must also be non-empty strings.
+
 Policy fixtures can define allowed fields, sensitive fields, blocked fields, and
 approval modes that require manual review. `requiredFields`, `optionalFields`,
 `requestedFields`, and every policy field list must be JSON arrays, including
 when a list contains only one field. Every list entry must be a non-empty string.
 Surrounding whitespace is ignored and duplicate names are collapsed before
-action fields are compared with policy fields.
+action fields are compared with policy fields. The only accepted policy keys are
+`allowedFields`, `sensitiveFields`, `blockedFields`, and
+`manualReviewApprovals`; unknown keys are rejected with their property name so
+misspellings cannot silently disable a rule.
 
 ## Limitations
 
