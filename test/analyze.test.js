@@ -131,3 +131,37 @@ test('rejects malformed policy list entries with their location', () => {
     { message: 'policy.blockedFields[1] must be a non-empty string' }
   );
 });
+
+for (const [property, value] of [
+  ['connector', ''],
+  ['connector', 42],
+  ['operation', '   '],
+  ['operation', {}],
+  ['destination', []],
+  ['approval', false]
+]) {
+  test(`rejects malformed action ${property} metadata`, () => {
+    assert.throws(
+      () => analyzeAction({
+        connector: 'crm',
+        operation: 'update-contact',
+        requiredFields: ['email'],
+        requestedFields: ['email'],
+        [property]: value
+      }),
+      { message: `${property} must be a non-empty string` }
+    );
+  });
+}
+
+test('rejects unknown policy properties', () => {
+  assert.throws(
+    () => analyzeAction({
+      connector: 'crm',
+      operation: 'update-contact',
+      requiredFields: ['email'],
+      requestedFields: ['email', 'ssn']
+    }, { blockedField: ['ssn'] }),
+    { message: 'unknown policy property: blockedField' }
+  );
+});

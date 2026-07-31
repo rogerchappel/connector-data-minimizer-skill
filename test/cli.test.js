@@ -1,6 +1,9 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 function runCli(...args) {
   return spawnSync(process.execPath, ['src/cli.js', 'fixtures/action.json', ...args], {
@@ -57,4 +60,36 @@ test('preserves documented output formats', () => {
   assert.match(markdown.stdout, /^# Connector Data Minimization Report/);
   assert.equal(json.status, 0);
   assert.doesNotThrow(() => JSON.parse(json.stdout));
+});
+
+test('malformed action metadata cannot pass strict mode', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-data-minimizer-'));
+  const fixture = join(directory, 'action.json');
+  writeFileSync(fixture, JSON.stringify({
+    connector: '',
+    operation: 42,
+    requiredFields: ['email'],
+    requestedFields: ['email']
+  }));
+
+  const result = spawnSync(process.execPath, ['src/cli.js', fixture, '--format', 'json', '--strict'], {
+    cwd: process.cwd(),
+    encoding: 'utf8'
+  });
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'connector must be a non-empty string\n');
+});
+
+test('policy typos cannot pass strict mode', () => {
+  const directory = mkdtempSync(join(tmpdir(), 'connector-data-minimizer-'));
+  const policy = join(directory, 'policy.json');
+  writeFileSync(policy, JSON.stringify({ blockedField: ['ssn'] }));
+
+  const result = runCli('--policy', policy, '--format', 'json', '--strict');
+
+  assert.equal(result.status, 1);
+  assert.equal(result.stdout, '');
+  assert.equal(result.stderr, 'unknown policy property: blockedField\n');
 });
