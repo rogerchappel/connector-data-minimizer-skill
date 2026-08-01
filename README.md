@@ -13,8 +13,27 @@ external systems, or approve actions.
 npm install
 npm test
 npm run smoke
+npm run package-smoke
 node src/cli.js fixtures/action.json --policy fixtures/policy.json --format json
 ```
+
+## Library
+
+The package root provides the analyzer and report formatter functions for ESM
+consumers:
+
+```js
+import {
+  analyzeAction,
+  validateAction,
+  formatJson,
+  formatMarkdown,
+} from 'connector-data-minimizer-skill';
+```
+
+`analyzeAction` validates and analyzes an action fixture with an optional policy.
+`validateAction` can validate the same inputs without producing findings. Use
+`formatJson` or `formatMarkdown` to render the analysis result.
 
 ## CLI
 

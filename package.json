@@ -3,13 +3,17 @@
   "version": "0.1.0",
   "description": "Audit connector action fixtures for minimal data collection before agent approval.",
   "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
   "bin": {
     "connector-data-minimizer": "./src/cli.js"
   },
   "scripts": {
     "test": "node --test",
-    "check": "node --check src/*.js test/*.test.js",
-    "smoke": "node src/cli.js fixtures/action.json --policy fixtures/policy.json --format markdown"
+    "check": "node --check src/*.js test/*.test.js scripts/*.mjs",
+    "smoke": "node src/cli.js fixtures/action.json --policy fixtures/policy.json --format markdown",
+    "package-smoke": "node scripts/package-smoke.mjs"
   },
   "keywords": [
     "agent-skills",
