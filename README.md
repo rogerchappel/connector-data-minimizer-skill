@@ -44,6 +44,10 @@ connector-data-minimizer <action.json> [--policy policy.json] [--format markdown
 `--format` defaults to `markdown` and accepts only `markdown` or `json`. Supplying
 the flag without a value, or using another format name, exits with an error.
 Unknown options and unexpected positional arguments are also rejected.
+Each option may appear only once; duplicate value options and duplicate boolean
+options exit with a usage error. Option syntax and `--format` values are
+validated before action or policy files are read, so argument errors take
+precedence over filesystem errors.
 
 Use `--strict` in CI or release gates when extra fields, missing required fields,
 blocked policy fields, or high-risk approval modes should fail the command.
