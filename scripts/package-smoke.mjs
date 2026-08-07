@@ -1,4 +1,4 @@
-import { execFileSync } from 'node:child_process';
+import { execFileSync, spawnSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -38,6 +38,43 @@ console.log(\`Packed-package import passed: ${'${Object.keys(library).join(\', \
   );
 
   execFileSync(process.execPath, ['verify.mjs'], { cwd: consumer, stdio: 'inherit' });
+
+  const bin = join(consumer, 'node_modules', '.bin', 'connector-data-minimizer');
+  const fixture = join(consumer, 'action.json');
+  writeFileSync(fixture, JSON.stringify({
+    connector: 'crm',
+    operation: 'create-contact',
+    requiredFields: ['email'],
+    requestedFields: ['email', 'private_note'],
+  }));
+
+  const runBin = (...args) => spawnSync(bin, args, { cwd: consumer, encoding: 'utf8' });
+  const usage = runBin();
+  if (usage.status !== 1 || !usage.stderr.includes('usage: connector-data-minimizer')) {
+    throw new Error(`installed bin usage check failed: ${usage.stderr}`);
+  }
+
+  const markdown = runBin(fixture);
+  if (markdown.status !== 0 || !markdown.stdout.startsWith('# Connector Data Minimization Report')) {
+    throw new Error(`installed bin markdown check failed: ${markdown.stderr}`);
+  }
+
+  const json = runBin(fixture, '--format', 'json');
+  if (json.status !== 0 || JSON.parse(json.stdout).unsafe !== true) {
+    throw new Error(`installed bin JSON check failed: ${json.stderr}`);
+  }
+
+  const strict = runBin(fixture, '--format', 'json', '--strict');
+  if (strict.status !== 2 || JSON.parse(strict.stdout).unsafe !== true) {
+    throw new Error(`installed bin strict check failed: ${strict.stderr}`);
+  }
+
+  const duplicate = runBin(fixture, '--strict', '--strict');
+  if (duplicate.status !== 1 || duplicate.stderr !== 'duplicate option: --strict\n') {
+    throw new Error(`installed bin argument check failed: ${duplicate.stderr}`);
+  }
+
+  console.log('Packed-package CLI passed: usage, markdown, JSON, strict, argument errors');
 } finally {
   rmSync(workspace, { recursive: true, force: true });
 }
