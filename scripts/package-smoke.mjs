@@ -6,6 +6,18 @@ import { join } from 'node:path';
 const workspace = mkdtempSync(join(tmpdir(), 'connector-data-minimizer-package-'));
 
 try {
+  const publish = spawnSync(
+    'npx',
+    ['--yes', 'npm@11.16.0', 'publish', '--dry-run', '--json'],
+    { encoding: 'utf8' },
+  );
+  if (publish.status !== 0) {
+    throw new Error(`npm publish --dry-run failed: ${publish.stderr || publish.stdout}`);
+  }
+  if (/auto-corrected|invalid and removed/i.test(publish.stderr)) {
+    throw new Error(`publish manifest required normalization: ${publish.stderr}`);
+  }
+
   const packOutput = execFileSync(
     'npm',
     ['pack', '--json', '--pack-destination', workspace],
