@@ -7,7 +7,7 @@
     ".": "./src/index.js"
   },
   "bin": {
-    "connector-data-minimizer": "./src/cli.js"
+    "connector-data-minimizer": "src/cli.js"
   },
   "scripts": {
     "test": "node --test",

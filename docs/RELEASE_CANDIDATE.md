@@ -6,9 +6,12 @@ ship
 
 ## Verification
 
-- `npm test` - pass, 4 tests
+- `npm test` - pass
 - `npm run check` - pass
 - `npm run smoke` - pass, fixture recommends `block` for excessive and blocked fields
+- `npm run package-smoke` - pass; npm 11.16.0 accepts the publish manifest
+  without correction, and the packed package exposes its root API and installed
+  `connector-data-minimizer` command
 
 ## Known Limits
 
