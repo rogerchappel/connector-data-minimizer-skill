@@ -82,6 +82,12 @@ action fields are compared with policy fields. The only accepted policy keys are
 `manualReviewApprovals`; unknown keys are rejected with their property name so
 misspellings cannot silently disable a rule.
 
+Markdown reports render fixture-supplied metadata and field names as code spans.
+Line breaks, tabs, and other control characters are shown as `\\n`, `\\t`, or
+Unicode escape sequences, so fixture values remain visible without creating
+headings, lists, links, emphasis, or additional report lines. JSON reports retain
+the original analyzed values unchanged.
+
 ## Limitations
 
 - Field comparison is name-based and intentionally deterministic.
