@@ -6,10 +6,10 @@ export function formatMarkdown(report) {
   const lines = [
     `# Connector Data Minimization Report`,
     ``,
-    `- Connector: ${report.connector}`,
-    `- Operation: ${report.operation}`,
-    `- Destination: ${report.destination}`,
-    `- Approval mode: ${report.approval}`,
+    `- Connector: ${markdownValue(report.connector)}`,
+    `- Operation: ${markdownValue(report.operation)}`,
+    `- Destination: ${markdownValue(report.destination)}`,
+    `- Approval mode: ${markdownValue(report.approval)}`,
     `- Recommendation: ${report.recommendation}`,
     ``,
     `## Minimal Field Set`,
@@ -43,13 +43,24 @@ function approvalSummary(report) {
 }
 
 function inline(values) {
-  return values.length === 0 ? 'none' : values.join(', ');
+  return values.length === 0 ? 'none' : values.map(markdownValue).join(', ');
 }
 
 function list(values) {
   if (values.length === 0) {
     return '- none';
   }
-  return values.map((value) => `- ${value}`).join('\n');
+  return values.map((value) => `- ${markdownValue(value)}`).join('\n');
 }
 
+function markdownValue(value) {
+  const visible = value.replace(/[\u0000-\u001f\u007f-\u009f]/g, (character) => {
+    if (character === '\n') return '\\n';
+    if (character === '\r') return '\\r';
+    if (character === '\t') return '\\t';
+    return `\\u${character.codePointAt(0).toString(16).padStart(4, '0')}`;
+  });
+  const longestBacktickRun = Math.max(0, ...Array.from(visible.matchAll(/`+/g), (match) => match[0].length));
+  const fence = '`'.repeat(longestBacktickRun + 1);
+  return `${fence} ${visible} ${fence}`;
+}
