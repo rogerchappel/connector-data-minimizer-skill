@@ -12,14 +12,17 @@ permissions:
 
 jobs:
   test:
+    name: Node.js ${{ matrix.node-version }}
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [20, 24]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: ${{ matrix.node-version }}
       - run: npm test
       - run: npm run check
       - run: npm run smoke
-      - run: npm run package-smoke
       - run: npm run package-smoke
