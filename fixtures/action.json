@@ -3,8 +3,18 @@
   "operation": "create-contact",
   "destination": "sandbox",
   "approval": "dry-run",
-  "requiredFields": ["email", "name"],
-  "optionalFields": ["company"],
-  "requestedFields": ["email", "name", "company", "private_note", "ssn"]
+  "requiredFields": [
+    "email",
+    "name"
+  ],
+  "optionalFields": [
+    "company"
+  ],
+  "requestedFields": [
+    "email",
+    "name",
+    "company",
+    "private_note",
+    "[REDACTED_PII]"
+  ]
 }
-

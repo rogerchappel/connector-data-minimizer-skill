@@ -97,6 +97,8 @@ the original analyzed values unchanged.
 ## Safety Notes
 
 - Never pass live credentials or secrets into fixtures.
+- Fixture examples use only synthetic values; sensitive field names are
+  shown as `[REDACTED_PII]` placeholders.
 - Review the generated minimal field set before executing any real action.
 - Treat sensitive-field findings as approval blockers unless a human explicitly
   accepts the risk.
