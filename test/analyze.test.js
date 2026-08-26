@@ -165,3 +165,44 @@ test('rejects unknown policy properties', () => {
     { message: 'unknown policy property: blockedField' }
   );
 });
+
+test('passes empty field lists and an empty policy', () => {
+  const report = analyzeAction({
+    connector: 'crm',
+    operation: 'create-contact',
+    requiredFields: [],
+    optionalFields: [],
+    requestedFields: []
+  });
+
+  assert.equal(report.recommendation, 'pass');
+  assert.equal(report.unsafe, false);
+  assert.deepEqual(report.minimalFields, []);
+  assert.deepEqual(report.optionalFields, []);
+  assert.deepEqual(report.requestedFields, []);
+  assert.deepEqual(report.extraFields, []);
+  assert.deepEqual(report.missingRequired, []);
+  assert.deepEqual(report.disallowedFields, []);
+  assert.deepEqual(report.sensitiveFields, []);
+  assert.deepEqual(report.blockedFields, []);
+});
+
+test('empty policy lists leave requested fields unrestricted', () => {
+  const report = analyzeAction({
+    connector: 'crm',
+    operation: 'create-contact',
+    requiredFields: ['email'],
+    requestedFields: ['email', 'anything']
+  }, {
+    allowedFields: [],
+    sensitiveFields: [],
+    blockedFields: [],
+    manualReviewApprovals: []
+  });
+
+  assert.equal(report.recommendation, 'review');
+  assert.deepEqual(report.disallowedFields, []);
+  assert.deepEqual(report.sensitiveFields, []);
+  assert.deepEqual(report.blockedFields, []);
+  assert.deepEqual(report.extraFields, ['anything']);
+});
