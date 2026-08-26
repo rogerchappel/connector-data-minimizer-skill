@@ -10,7 +10,7 @@ external systems, or approve actions.
 ## Quickstart
 
 ```bash
-npm install
+npm ci
 npm test
 npm run smoke
 npm run package-smoke
