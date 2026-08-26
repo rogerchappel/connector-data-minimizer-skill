@@ -251,3 +251,83 @@ for (const [property, value] of [
     );
   });
 }
+
+test('blocked fields win over allowed fields', () => {
+  const report = analyzeAction({
+    connector: 'crm',
+    operation: 'create-contact',
+    requiredFields: ['email'],
+    requestedFields: ['email', 'government_id']
+  }, {
+    allowedFields: ['email', 'government_id'],
+    blockedFields: ['government_id']
+  });
+
+  assert.equal(report.recommendation, 'block');
+  assert.deepEqual(report.blockedFields, ['government_id']);
+  assert.deepEqual(report.disallowedFields, []);
+});
+
+test('sensitive fields still require review when also allowed', () => {
+  const report = analyzeAction({
+    connector: 'crm',
+    operation: 'create-contact',
+    requiredFields: ['email'],
+    requestedFields: ['email', 'government_id']
+  }, {
+    allowedFields: ['email', 'government_id'],
+    sensitiveFields: ['government_id']
+  });
+
+  assert.equal(report.recommendation, 'review');
+  assert.deepEqual(report.sensitiveFields, ['government_id']);
+  assert.deepEqual(report.disallowedFields, []);
+  assert.deepEqual(report.blockedFields, []);
+});
+
+for (const [label, value] of [
+  ['null', null],
+  ['an array', []],
+  ['a string', 'crm']
+]) {
+  test(`rejects ${label} action input`, () => {
+    assert.throws(
+      () => analyzeAction(value),
+      { message: 'action fixture must be an object' }
+    );
+  });
+}
+
+for (const key of ['connector', 'operation', 'requiredFields', 'requestedFields']) {
+  test(`rejects an action fixture missing ${key}`, () => {
+    const action = {
+      connector: 'crm',
+      operation: 'create-contact',
+      requiredFields: ['email'],
+      requestedFields: ['email']
+    };
+    delete action[key];
+    assert.throws(
+      () => analyzeAction(action),
+      { message: `action fixture missing ${key}` }
+    );
+  });
+}
+
+for (const [label, value] of [
+  ['null', null],
+  ['an array', []],
+  ['a string', 'policy']
+]) {
+  test(`rejects ${label} policy input`, () => {
+    assert.throws(
+      () => analyzeAction({
+        connector: 'crm',
+        operation: 'create-contact',
+        requiredFields: ['email'],
+        requestedFields: ['email']
+      }, value),
+      { message: 'policy fixture must be an object' }
+    );
+  });
+}
