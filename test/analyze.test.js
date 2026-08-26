@@ -206,3 +206,48 @@ test('empty policy lists leave requested fields unrestricted', () => {
   assert.deepEqual(report.blockedFields, []);
   assert.deepEqual(report.extraFields, ['anything']);
 });
+
+test('omitted optional fields, destination, and approval default safely', () => {
+  const report = analyzeAction({
+    connector: 'crm',
+    operation: 'create-contact',
+    requiredFields: ['email'],
+    requestedFields: ['email']
+  });
+
+  assert.deepEqual(report.optionalFields, []);
+  assert.equal(report.destination, 'unspecified');
+  assert.equal(report.approval, 'unspecified');
+  assert.equal(report.recommendation, 'pass');
+});
+
+test('null optional fields are rejected', () => {
+  assert.throws(
+    () => analyzeAction({
+      connector: 'crm',
+      operation: 'update-contact',
+      requiredFields: ['email'],
+      optionalFields: null,
+      requestedFields: ['email']
+    }),
+    { message: 'optionalFields must be an array' }
+  );
+});
+
+for (const [property, value] of [
+  ['destination', null],
+  ['approval', null]
+]) {
+  test(`rejects null action ${property} metadata`, () => {
+    assert.throws(
+      () => analyzeAction({
+        connector: 'crm',
+        operation: 'update-contact',
+        requiredFields: ['email'],
+        requestedFields: ['email'],
+        [property]: value
+      }),
+      { message: `${property} must be a non-empty string` }
+    );
+  });
+}
