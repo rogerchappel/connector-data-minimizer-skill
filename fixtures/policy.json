@@ -1,7 +1,19 @@
 {
-  "allowedFields": ["email", "name", "company", "title"],
-  "sensitiveFields": ["ssn", "private_note"],
-  "blockedFields": ["ssn"],
-  "manualReviewApprovals": ["live-write", "production"]
+  "allowedFields": [
+    "email",
+    "name",
+    "company",
+    "title"
+  ],
+  "sensitiveFields": [
+    "[REDACTED_PII]",
+    "private_note"
+  ],
+  "blockedFields": [
+    "[REDACTED_PII]"
+  ],
+  "manualReviewApprovals": [
+    "live-write",
+    "production"
+  ]
 }
-
