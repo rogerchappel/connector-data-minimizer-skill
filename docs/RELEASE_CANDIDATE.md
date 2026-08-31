@@ -6,6 +6,9 @@ ship
 
 ## Verification
 
+- GitHub Actions - pass on the declared minimum Node.js 20.0.0 and Node.js 24,
+  using immutable action revisions and read-only repository permissions
+- `npm ci` - pass
 - `npm test` - pass
 - `npm run check` - pass
 - `npm run smoke` - pass, fixture recommends `block` for excessive and blocked fields
