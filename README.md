@@ -52,6 +52,10 @@ precedence over filesystem errors.
 Use `--strict` in CI or release gates when extra fields, missing required fields,
 blocked policy fields, or high-risk approval modes should fail the command.
 
+The checked-in CI workflow tests Node.js 20.0.0 and 24 with immutable v7 pins
+for `actions/checkout` and `actions/setup-node`. Self-hosted runners must be
+Actions Runner v2.327.1 or later because these action releases use Node.js 24.
+
 ## Fixture Shape
 
 Action fixtures include the connector, operation, destination, approval mode, and
