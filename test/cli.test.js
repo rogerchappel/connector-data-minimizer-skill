@@ -24,7 +24,7 @@ test('rejects an unsupported output format', () => {
 
   assert.equal(result.status, 1);
   assert.equal(result.stdout, '');
-  assert.match(result.stderr, /--format must be one of: markdown, json/);
+  assert.match(result.stderr, /--format must be one of: markdown, json, sarif/);
 });
 
 test('rejects a missing output format value', () => {
@@ -70,7 +70,7 @@ test('validates the output format before reading fixture files', () => {
 
   assert.equal(result.status, 1);
   assert.equal(result.stdout, '');
-  assert.equal(result.stderr, '--format must be one of: markdown, json\n');
+  assert.equal(result.stderr, '--format must be one of: markdown, json, sarif\n');
 });
 
 test('preserves policy and strict behavior', () => {
@@ -84,11 +84,14 @@ test('preserves policy and strict behavior', () => {
 test('preserves documented output formats', () => {
   const markdown = runCli('--format', 'markdown');
   const json = runCli('--format', 'json');
+  const sarif = runCli('--format', 'sarif');
 
   assert.equal(markdown.status, 0);
   assert.match(markdown.stdout, /^# Connector Data Minimization Report/);
   assert.equal(json.status, 0);
   assert.doesNotThrow(() => JSON.parse(json.stdout));
+  assert.equal(sarif.status, 0);
+  assert.equal(JSON.parse(sarif.stdout).version, '2.1.0');
 });
 
 test('malformed action metadata cannot pass strict mode', () => {

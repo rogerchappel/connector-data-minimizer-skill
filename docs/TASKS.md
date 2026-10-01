@@ -7,5 +7,5 @@
 - [x] Document skill usage and side-effect boundaries
 - [x] Add smoke and validation commands
 - [ ] Add schema adapters for common connector fixture formats
-- [ ] Add SARIF output for repository-wide audits
+- [x] Add SARIF output for repository-wide audits
 
