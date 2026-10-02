@@ -34,9 +34,9 @@ try {
   writeFileSync(
     join(consumer, 'verify.mjs'),
     `import assert from 'node:assert/strict';
-import { analyzeAction, validateAction, formatJson, formatMarkdown } from 'connector-data-minimizer-skill';
+import { analyzeAction, validateAction, formatJson, formatMarkdown, formatSarif } from 'connector-data-minimizer-skill';
 
-const library = { analyzeAction, validateAction, formatJson, formatMarkdown };
+const library = { analyzeAction, validateAction, formatJson, formatMarkdown, formatSarif };
 for (const [name, value] of Object.entries(library)) {
   assert.equal(typeof value, 'function', \`${'${name}'} must be a function\`);
 }
@@ -76,6 +76,11 @@ console.log(\`Packed-package import passed: ${'${Object.keys(library).join(\', \
     throw new Error(`installed bin JSON check failed: ${json.stderr}`);
   }
 
+  const sarif = runBin(fixture, '--format', 'sarif');
+  if (sarif.status !== 0 || JSON.parse(sarif.stdout).version !== '2.1.0') {
+    throw new Error(`installed bin SARIF check failed: ${sarif.stderr}`);
+  }
+
   const strict = runBin(fixture, '--format', 'json', '--strict');
   if (strict.status !== 2 || JSON.parse(strict.stdout).unsafe !== true) {
     throw new Error(`installed bin strict check failed: ${strict.stderr}`);
@@ -86,7 +91,7 @@ console.log(\`Packed-package import passed: ${'${Object.keys(library).join(\', \
     throw new Error(`installed bin argument check failed: ${duplicate.stderr}`);
   }
 
-  console.log('Packed-package CLI passed: usage, markdown, JSON, strict, argument errors');
+  console.log('Packed-package CLI passed: usage, markdown, JSON, SARIF, strict, argument errors');
 } finally {
   rmSync(workspace, { recursive: true, force: true });
 }

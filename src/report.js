@@ -2,6 +2,28 @@ export function formatJson(report) {
   return `${JSON.stringify(report, null, 2)}\n`;
 }
 
+export function formatSarif(report) {
+  const findings = [
+    ['MISSING_REQUIRED', report.missingRequired, 'Required field was not requested'],
+    ['EXTRA_FIELD', report.extraFields, 'Unnecessary field was requested'],
+    ['DISALLOWED_FIELD', report.disallowedFields, 'Field is not allowed by policy'],
+    ['SENSITIVE_FIELD', report.sensitiveFields, 'Sensitive field was requested'],
+    ['BLOCKED_FIELD', report.blockedFields, 'Blocked field was requested']
+  ];
+  const results = findings.flatMap(([ruleId, fields, message]) => fields.map((field) => ({
+    ruleId,
+    level: ruleId === 'MISSING_REQUIRED' || ruleId === 'DISALLOWED_FIELD' || ruleId === 'BLOCKED_FIELD' ? 'error' : 'warning',
+    message: { text: `${message}: ${field}` },
+    locations: [{ logicalLocations: [{ name: `${report.connector}.${report.operation}`, kind: 'function' }] }]
+  })));
+  if (report.manualReview) results.push({
+    ruleId: 'MANUAL_REVIEW', level: 'warning', message: { text: 'Action requires manual review' },
+    locations: [{ logicalLocations: [{ name: `${report.connector}.${report.operation}`, kind: 'function' }] }]
+  });
+  const rules = [...new Set(results.map((result) => result.ruleId))].map((id) => ({ id, shortDescription: { text: id.replaceAll('_', ' ').toLowerCase() } }));
+  return `${JSON.stringify({ $schema: 'https://json.schemastore.org/sarif-2.1.0.json', version: '2.1.0', runs: [{ tool: { driver: { name: 'connector-data-minimizer', rules } }, results }] }, null, 2)}\n`;
+}
+
 export function formatMarkdown(report) {
   const lines = [
     `# Connector Data Minimization Report`,

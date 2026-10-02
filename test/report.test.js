@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { analyzeAction } from '../src/analyze.js';
-import { formatMarkdown } from '../src/report.js';
+import { formatMarkdown, formatSarif } from '../src/report.js';
 
 test('renders approval-ready markdown', () => {
   const report = analyzeAction({
@@ -52,4 +52,15 @@ test('keeps field names inside inline findings and field lists', () => {
   assert.match(markdown, /Extra requested: ` \*\*extra\*\*\\r\\n> quote `/);
   assert.equal(markdown.includes('\n1. injected\n'), false);
   assert.equal(markdown.includes('\n> quote\n'), false);
+});
+
+test('renders findings as SARIF 2.1.0 results with matching rule definitions', () => {
+  const sarif = JSON.parse(formatSarif(analyzeAction({
+    connector: 'crm', operation: 'create-contact', requiredFields: ['email'],
+    requestedFields: ['email', 'ssn']
+  }, { sensitiveFields: ['ssn'] })));
+  assert.equal(sarif.version, '2.1.0');
+  assert.equal(sarif.runs[0].tool.driver.name, 'connector-data-minimizer');
+  assert.deepEqual(sarif.runs[0].results.map((result) => result.ruleId), ['EXTRA_FIELD', 'SENSITIVE_FIELD']);
+  assert.deepEqual(sarif.runs[0].tool.driver.rules.map((rule) => rule.id), ['EXTRA_FIELD', 'SENSITIVE_FIELD']);
 });

@@ -28,12 +28,13 @@ import {
   validateAction,
   formatJson,
   formatMarkdown,
+  formatSarif,
 } from 'connector-data-minimizer-skill';
 ```
 
 `analyzeAction` validates and analyzes an action fixture with an optional policy.
 `validateAction` can validate the same inputs without producing findings. Use
-`formatJson` or `formatMarkdown` to render the analysis result.
+`formatJson`, `formatMarkdown`, or `formatSarif` to render the analysis result.
 
 ## CLI
 
@@ -41,7 +42,7 @@ import {
 connector-data-minimizer <action.json> [--policy policy.json] [--format markdown|json] [--strict]
 ```
 
-`--format` defaults to `markdown` and accepts only `markdown` or `json`. Supplying
+`--format` defaults to `markdown` and accepts `markdown`, `json`, or `sarif`. SARIF output uses version 2.1.0 and maps each finding to a stable rule ID and result for audit-tool ingestion. Supplying
 the flag without a value, or using another format name, exits with an error.
 Unknown options and unexpected positional arguments are also rejected.
 Each option may appear only once; duplicate value options and duplicate boolean

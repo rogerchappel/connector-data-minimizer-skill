@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { readFile } from 'node:fs/promises';
 import { analyzeAction } from './analyze.js';
-import { formatJson, formatMarkdown } from './report.js';
+import { formatJson, formatMarkdown, formatSarif } from './report.js';
 
 async function main(argv) {
   const [fixturePath, ...rest] = argv;
   if (!fixturePath) {
-    throw new Error('usage: connector-data-minimizer <action.json> [--policy policy.json] [--format markdown|json] [--strict]');
+    throw new Error('usage: connector-data-minimizer <action.json> [--policy policy.json] [--format markdown|json|sarif] [--strict]');
   }
 
   const flags = parseFlags(rest);
@@ -15,7 +15,7 @@ async function main(argv) {
   const policy = flags.policy ? JSON.parse(await readFile(flags.policy, 'utf8')) : {};
   const report = analyzeAction(action, policy);
 
-  process.stdout.write(format === 'json' ? formatJson(report) : formatMarkdown(report));
+  process.stdout.write(format === 'json' ? formatJson(report) : format === 'sarif' ? formatSarif(report) : formatMarkdown(report));
   if (flags.strict === true && report.unsafe) {
     process.exitCode = 2;
   }
@@ -26,8 +26,8 @@ function validateFormat(format) {
     throw new Error('--format requires a value');
   }
   const selected = format ?? 'markdown';
-  if (!['markdown', 'json'].includes(selected)) {
-    throw new Error('--format must be one of: markdown, json');
+  if (!['markdown', 'json', 'sarif'].includes(selected)) {
+    throw new Error('--format must be one of: markdown, json, sarif');
   }
   return selected;
 }
