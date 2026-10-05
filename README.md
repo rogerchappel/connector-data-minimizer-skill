@@ -107,3 +107,24 @@ the original analyzed values unchanged.
 - Review the generated minimal field set before executing any real action.
 - Treat sensitive-field findings as approval blockers unless a human explicitly
   accepts the risk.
+
+### JSON Schema-like connector fixtures
+
+Use `adaptJsonSchemaFixture` to convert a fixture with `properties` and a
+`required` list into the canonical action shape accepted by `analyzeAction`:
+
+```js
+import { adaptJsonSchemaFixture, analyzeAction } from 'connector-data-minimizer-skill';
+const action = adaptJsonSchemaFixture({
+  connector: 'crm', operation: 'create-contact',
+  properties: { email: { type: 'string' }, note: { type: 'string' } },
+  required: ['email']
+});
+const report = analyzeAction(action);
+```
+
+All property names are considered requested fields; required property names
+become `requiredFields`, and the remaining names become `optionalFields`. The
+adapter validates its resulting action through the existing analyzer. It does
+not interpret schema types, defaults, or nested schemas. A `required` name that
+is absent from `properties` is rejected.
