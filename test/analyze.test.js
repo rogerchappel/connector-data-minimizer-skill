@@ -331,3 +331,22 @@ for (const [label, value] of [
     );
   });
 }
+
+test('adapts JSON Schema properties into a validated action fixture', async () => {
+  const { adaptJsonSchemaFixture } = await import('../src/analyze.js');
+  const action = adaptJsonSchemaFixture({
+    connector: 'crm', operation: 'create-contact', destination: 'sandbox',
+    properties: { email: { type: 'string' }, name: { type: 'string' }, note: { type: 'string' } },
+    required: ['email', 'name']
+  });
+  assert.deepEqual(action.requiredFields, ['email', 'name']);
+  assert.deepEqual(action.optionalFields, ['note']);
+  assert.deepEqual(action.requestedFields, ['email', 'name', 'note']);
+  assert.equal(analyzeAction(action).recommendation, 'pass');
+});
+
+test('rejects schema required fields absent from properties', async () => {
+  const { adaptJsonSchemaFixture } = await import('../src/analyze.js');
+  assert.throws(() => adaptJsonSchemaFixture({ connector: 'crm', operation: 'create', properties: {}, required: ['email'] }),
+    { message: 'schema fixture required field is not defined: email' });
+});

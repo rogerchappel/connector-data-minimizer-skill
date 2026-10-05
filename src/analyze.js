@@ -124,3 +124,23 @@ function normalizeList(values, label) {
     return value.trim();
   }))];
 }
+
+/** Convert a JSON Schema-like connector fixture into the canonical action shape. */
+export function adaptJsonSchemaFixture(fixture) {
+  if (!fixture || typeof fixture !== 'object' || Array.isArray(fixture)) throw new Error('schema fixture must be an object');
+  const { connector, operation, destination, approval, properties, required = [] } = fixture;
+  if (!properties || typeof properties !== 'object' || Array.isArray(properties)) throw new Error('schema fixture properties must be an object');
+  if (!Array.isArray(required)) throw new Error('schema fixture required must be an array');
+  const fields = Object.keys(properties);
+  for (const name of required) {
+    if (typeof name !== 'string' || !Object.hasOwn(properties, name)) throw new Error(`schema fixture required field is not defined: ${name}`);
+  }
+  const requiredSet = new Set(required);
+  return {
+    connector, operation, ...(destination === undefined ? {} : { destination }),
+    ...(approval === undefined ? {} : { approval }),
+    requiredFields: fields.filter((name) => requiredSet.has(name)),
+    optionalFields: fields.filter((name) => !requiredSet.has(name)),
+    requestedFields: fields
+  };
+}
