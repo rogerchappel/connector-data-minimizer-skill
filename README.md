@@ -128,3 +128,25 @@ become `requiredFields`, and the remaining names become `optionalFields`. The
 adapter validates its resulting action through the existing analyzer. It does
 not interpret schema types, defaults, or nested schemas. A `required` name that
 is absent from `properties` is rejected.
+
+### OpenAPI operation fixtures
+
+`adaptOpenApiOperation` extracts an inline `application/json` request-body
+schema and sends it through the same validated adapter. Supply connector and
+operation identity separately. OpenAPI properties describe the possible schema
+shape, not which fields a connector actually sends; use the schema extensions
+`x-requested-fields` and `x-optional-fields` to declare those explicitly. Without
+`x-requested-fields`, all properties are treated as requested; without
+`x-optional-fields`, no properties are treated as optional for minimization.
+
+```js
+import { adaptOpenApiOperation } from 'connector-data-minimizer-skill';
+const action = adaptOpenApiOperation(openApiOperation, {
+  connector: 'crm', operation: 'create-contact'
+});
+```
+
+Only inline `properties` and `required` are interpreted. `$ref` resolution,
+other media types, and schema composition are out of scope; absent or
+unsupported JSON request schemas are rejected. See
+`fixtures/openapi-operation.json` for a synthetic example.
