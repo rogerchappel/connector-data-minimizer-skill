@@ -1,0 +1,20 @@
+{
+  "requestBody": {
+    "required": true,
+    "content": {
+      "application/json": {
+        "schema": {
+          "type": "object",
+          "properties": {
+            "email": { "type": "string" }, "name": { "type": "string" },
+            "company": { "type": "string" }, "private_note": { "type": "string" },
+            "[REDACTED_PII]": { "type": "string" }
+          },
+          "required": ["email", "name"],
+          "x-requested-fields": ["email", "name", "company", "private_note", "[REDACTED_PII]"],
+          "x-optional-fields": ["company"]
+        }
+      }
+    }
+  }
+}

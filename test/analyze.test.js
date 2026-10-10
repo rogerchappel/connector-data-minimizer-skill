@@ -350,3 +350,21 @@ test('rejects schema required fields absent from properties', async () => {
   assert.throws(() => adaptJsonSchemaFixture({ connector: 'crm', operation: 'create', properties: {}, required: ['email'] }),
     { message: 'schema fixture required field is not defined: email' });
 });
+
+test('adapts an OpenAPI JSON request body and requested-field extension to equivalent action findings', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { adaptOpenApiOperation } = await import('../src/analyze.js');
+  const action = JSON.parse(await readFile(new URL('../fixtures/action.json', import.meta.url), 'utf8'));
+  const operation = JSON.parse(await readFile(new URL('../fixtures/openapi-operation.json', import.meta.url), 'utf8'));
+  const adapted = adaptOpenApiOperation(operation, {
+    connector: action.connector, operation: action.operation,
+    destination: action.destination, approval: action.approval
+  });
+  assert.deepEqual(analyzeAction(adapted), analyzeAction(action));
+});
+
+test('rejects OpenAPI operations without a JSON request schema', async () => {
+  const { adaptOpenApiOperation } = await import('../src/analyze.js');
+  assert.throws(() => adaptOpenApiOperation({ requestBody: { content: { 'text/plain': {} } } }),
+    { message: 'OpenAPI requestBody must define an application/json schema' });
+});
